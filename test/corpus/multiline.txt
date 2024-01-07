@@ -1,0 +1,198 @@
+================================================================================
+multiline statement
+================================================================================
+
+a := 'foo' + \
+     'bar'
+--------------------------------------------------------------------------------
+
+(source_file
+  (item
+    (eol))
+  (item
+    (assignment
+      (identifier)
+      (expression
+        (value
+          (raw_string_literal))
+        (ERROR)
+        (value
+          (raw_string_literal)))
+      (eol))))
+
+================================================================================
+multiline within recipe
+================================================================================
+
+conditional:
+  if true; then \
+    echo 'True!'; \
+  fi
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (item
+    (eol))
+  (item
+    (recipe
+      (recipe_header
+        (identifier))
+      (recipe_body
+        (recipe_line
+          (text))
+        (recipe_line
+          (text))
+        (recipe_line
+          (text)))))
+  (item
+    (eol)))
+
+================================================================================
+multiline recipe
+================================================================================
+
+foo: \
+	bar
+	echo hello
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (item
+    (eol))
+  (item
+    (recipe
+      (recipe_header
+        (identifier))
+      (ERROR
+        (UNEXPECTED '\n'))))
+  (ERROR
+    (identifier)
+    (parameters
+      (parameter
+        (identifier))
+      (parameter
+        (identifier))))
+  (item
+    (eol))
+  (item
+    (eol)))
+
+================================================================================
+multiline recipe comments
+================================================================================
+
+dep1: \
+    # this comment is not part of the recipe body
+  echo 'dep1'
+--------------------------------------------------------------------------------
+
+(source_file
+  (item
+    (eol))
+  (item
+    (recipe
+      (recipe_header
+        (identifier))
+      (ERROR
+        (UNEXPECTED '\n'))))
+  (item
+    (eol
+      (comment)))
+  (ERROR
+    (identifier))
+  (item
+    (eol)))
+
+================================================================================
+multiline complex recipe
+================================================================================
+
+foo param1 \
+  param2='foo' \
+  *varparam='': dep1 \
+                (dep2 'foo')
+  echo {{param1}} {{param2}} {{varparam}}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (item
+    (eol))
+  (item
+    (recipe
+      (recipe_header
+        (identifier)
+        (parameters
+          (parameter
+            (identifier))
+          (ERROR
+            (UNEXPECTED '\n'))
+          (parameter
+            (identifier)
+            (value
+              (raw_string_literal)))
+          (ERROR
+            (UNEXPECTED '\n'))
+          (variadic_parameter
+            (parameter
+              (identifier)
+              (value
+                (raw_string_literal)))))
+        (dependencies
+          (dependency
+            (identifier))))
+      (ERROR
+        (UNEXPECTED '\n'))))
+  (ERROR
+    (identifier))
+  (item
+    (eol))
+  (ERROR
+    (identifier)
+    (ERROR)
+    (parameters
+      (parameter
+        (identifier))
+      (ERROR)
+      (parameter
+        (identifier))
+      (ERROR)
+      (parameter
+        (identifier))))
+  (item
+    (eol))
+  (item
+    (eol)))
+
+================================================================================
+multiline interpolation
+================================================================================
+
+recipe:
+  echo '{{ \
+  "This interpolation " + \
+    "has a lot of text." \
+  }}'
+  echo 'back to recipe body'
+--------------------------------------------------------------------------------
+
+(source_file
+  (item
+    (eol))
+  (item
+    (recipe
+      (recipe_header
+        (identifier))
+      (recipe_body
+        (recipe_line
+          (text))
+        (recipe_line
+          (text))
+        (recipe_line
+          (text))
+        (recipe_line
+          (text))
+        (recipe_line
+          (text))))))
